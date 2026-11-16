@@ -13,3 +13,9 @@ __pycache__/
 
 # Archivos temporales
 *.log
+
+# Respaldos locales
+validador_respaldo_*/
+
+# Configuración local de VS Code
+.vscode/
