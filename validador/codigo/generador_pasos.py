@@ -1,91 +1,62 @@
-
-from fractions import Fraction
-from mcm import calcular_mcm
-
-
-def mostrar_fraccion(numerador, denominador):
-    """Devuelve una fracción en formato legible."""
-    if denominador == 1:
-        return str(numerador)
-
-    return f"{numerador}/{denominador}"
-
-
-def generar_suma(n1, d1, n2, d2):
+def generar_explicacion(resultado_motor):
     """
-    Resuelve una suma de fracciones y genera
-    una explicación ordenada de sus pasos.
+    Organiza los pasos generados por el motor matemático
+    para presentarlos de forma ordenada.
     """
+    if not isinstance(resultado_motor, dict):
+        raise TypeError("Se esperaba un resultado del motor matemático.")
 
-    # Validación de los datos de entrada.
-    if not all(isinstance(x, int) for x in (n1, d1, n2, d2)):
-        raise TypeError("Los valores deben ser números enteros.")
+    if "pasos" not in resultado_motor or "resultado" not in resultado_motor:
+        raise ValueError("El resultado del motor está incompleto.")
 
-    if d1 <= 0 or d2 <= 0:
-        raise ValueError("Los denominadores deben ser positivos.")
+    pasos_motor = resultado_motor["pasos"]
 
-    if n1 < 0 or n2 < 0:
-        raise ValueError("Los numeradores no pueden ser negativos.")
+    if not isinstance(pasos_motor, list):
+        raise TypeError("Los pasos deben estar contenidos en una lista.")
 
-    # Cálculo del mínimo común múltiplo.
-    mcm = calcular_mcm(d1, d2)
+    explicacion = []
 
-    # Conversión a fracciones equivalentes.
-    factor1 = mcm // d1
-    factor2 = mcm // d2
+    for numero, paso in enumerate(pasos_motor, start=1):
+        if not isinstance(paso, dict):
+            raise ValueError("Se encontró un paso con formato incorrecto.")
 
-    nuevo_n1 = n1 * factor1
-    nuevo_n2 = n2 * factor2
+        regla = paso.get("regla")
+        descripcion = paso.get("descripcion")
+        expresion = paso.get("expresion")
 
-    # Suma de numeradores.
-    suma_numeradores = nuevo_n1 + nuevo_n2
+        texto = f"{numero}. {descripcion}"
 
-    # Simplificación exacta del resultado.
-    resultado = Fraction(suma_numeradores, mcm)
+        if expresion:
+            texto += f" {expresion}"
 
-    # Construcción de los pasos explicativos.
-    pasos = [
-        f"1. Identificar la operación: suma de {n1}/{d1} y {n2}/{d2}.",
-        f"2. Calcular el mínimo común múltiplo de {d1} y {d2}: {mcm}.",
-        (
-            f"3. Convertir las fracciones a denominador común: "
-            f"{n1}/{d1} = {nuevo_n1}/{mcm} y "
-            f"{n2}/{d2} = {nuevo_n2}/{mcm}."
-        ),
-        (
-            f"4. Sumar los numeradores y conservar el denominador: "
-            f"({nuevo_n1} + {nuevo_n2})/{mcm} = "
-            f"{suma_numeradores}/{mcm}."
-        )
-    ]
-
-    if resultado.numerator != suma_numeradores or resultado.denominator != mcm:
-        pasos.append(
-            f"5. Simplificar la fracción: "
-            f"{suma_numeradores}/{mcm} = "
-            f"{mostrar_fraccion(resultado.numerator, resultado.denominator)}."
-        )
-    else:
-        pasos.append("5. La fracción ya se encuentra simplificada.")
+        explicacion.append({
+            "numero": numero,
+            "regla": regla,
+            "texto": texto
+        })
 
     return {
-        "operacion": "suma",
-        "pasos": pasos,
-        "resultado_numerador": resultado.numerator,
-        "resultado_denominador": resultado.denominator,
-        "resultado": mostrar_fraccion(
-            resultado.numerator,
-            resultado.denominator
-        )
+        "entrada": resultado_motor.get("entrada"),
+        "explicacion": explicacion,
+        "resultado": resultado_motor["resultado"]
     }
 
-
 if __name__ == "__main__":
-    solucion = generar_suma(2, 3, 1, 4)
+    from validador.codigo.motor_matematico import operar_fracciones
+    operaciones = [
+        ("Suma", 2, 3, 1, 4, "+"),
+        ("Resta", 7, 8, 1, 4, "-"),
+        ("Multiplicación", 2, 3, 3, 4, "*"),
+        ("División", 2, 3, 4, 5, "/")
+    ]
 
-    print("========== GENERADOR DE SUMAS ==========")
+    for nombre, n1, d1, n2, d2, operador in operaciones:
+        motor = operar_fracciones(n1, d1, n2, d2, operador)
+        explicacion = generar_explicacion(motor)
 
-    for paso in solucion["pasos"]:
-        print(paso)
+        print(f"\n========== {nombre.upper()} ==========")
 
-    print("\nResultado final:", solucion["resultado"])
+        for paso in explicacion["explicacion"]:
+            print(paso["texto"])
+
+        print("Resultado final:", explicacion["resultado"]["mixto"])

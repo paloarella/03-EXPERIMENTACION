@@ -1,13 +1,10 @@
-
-from math import gcd
-
+from validador.codigo.modelo_fraccion import Fraccion
+from validador.codigo.mcm import calcular_mcm
 
 # ==========================================
 # 1. VALIDACIÓN DE ENTRADAS
 # ==========================================
-
 def validar_entrada(n1, d1, n2, d2, operacion):
-
     valores = (n1, d1, n2, d2)
 
     if any(type(valor) is not int for valor in valores):
@@ -26,44 +23,28 @@ def validar_entrada(n1, d1, n2, d2, operacion):
 # ==========================================
 # 2. NORMALIZACIÓN Y SIMPLIFICACIÓN
 # ==========================================
-
 def normalizar(numerador, denominador):
     """
-    Mantiene el denominador positivo y reduce
-    la fracción a su forma irreducible.
+    Normaliza una fracción mediante el modelo central.
     """
+    fraccion = Fraccion(numerador, denominador)
 
-    if denominador == 0:
-        raise ZeroDivisionError("El denominador no puede ser cero.")
-
-    if denominador < 0:
-        numerador = -numerador
-        denominador = -denominador
-
-    divisor = gcd(abs(numerador), denominador)
-
-    return numerador // divisor, denominador // divisor
-
-
-def calcular_mcm(a, b):
-    """Calcula el mínimo común múltiplo."""
-
-    return abs(a * b) // gcd(a, b)
-
+    return fraccion.numerador, fraccion.denominador
 
 # ==========================================
 # 3. REPRESENTACIÓN DEL RESULTADO
 # ==========================================
 
 def generar_resultado(numerador, denominador):
+    fraccion = Fraccion(numerador, denominador)
 
-    n, d = normalizar(numerador, denominador)
+    n = fraccion.numerador
+    d = fraccion.denominador
 
     if n == 0:
         mixto = "0"
 
     elif abs(n) >= d:
-
         entero = abs(n) // d
         residuo = abs(n) % d
 
@@ -81,33 +62,47 @@ def generar_resultado(numerador, denominador):
         "numerador": n,
         "denominador": d,
         "fraccion": f"{n}/{d}",
-        "mixto": mixto
+        "mixto": mixto,
+        "simplificada": (
+            n != numerador or d != denominador
+        ),
+        "mcd": (
+            __import__("math").gcd(
+                abs(numerador), abs(denominador)
+            )
+        )
     }
-
 
 # ==========================================
 # 4. REGISTRO DE PASOS
 # ==========================================
-
 def agregar_paso(pasos, regla, descripcion, expresion=None):
-
     pasos.append({
         "regla": regla,
         "descripcion": descripcion,
         "expresion": expresion
     })
 
-
 # ==========================================
 # 5. MOTOR GENERAL
 # ==========================================
-
 def operar_fracciones(n1, d1, n2, d2, operacion):
-
     validar_entrada(n1, d1, n2, d2, operacion)
 
-    pasos = []
+    # Conservar los datos originales para el registro.
+    entrada_original = (n1, d1, n2, d2, operacion)
 
+    # Normalizar ambas fracciones desde el inicio.
+    fraccion1 = Fraccion(n1, d1)
+    fraccion2 = Fraccion(n2, d2)
+
+    n1 = fraccion1.numerador
+    d1 = fraccion1.denominador
+
+    n2 = fraccion2.numerador
+    d2 = fraccion2.denominador
+
+    pasos = []
     expresion = f"{n1}/{d1} {operacion} {n2}/{d2}"
 
     agregar_paso(
@@ -120,11 +115,8 @@ def operar_fracciones(n1, d1, n2, d2, operacion):
     # --------------------------------------
     # SUMA Y RESTA
     # --------------------------------------
-
     if operacion in ("+", "-"):
-
         mcm = calcular_mcm(d1, d2)
-
         agregar_paso(
             pasos,
             "R01",
@@ -164,9 +156,7 @@ def operar_fracciones(n1, d1, n2, d2, operacion):
     # --------------------------------------
     # MULTIPLICACIÓN
     # --------------------------------------
-
     elif operacion == "*":
-
         numerador = n1 * n2
         denominador = d1 * d2
 
@@ -189,7 +179,6 @@ def operar_fracciones(n1, d1, n2, d2, operacion):
     # --------------------------------------
 
     else:
-
         agregar_paso(
             pasos,
             "R06",
@@ -214,28 +203,33 @@ def operar_fracciones(n1, d1, n2, d2, operacion):
             "Multiplicar los denominadores.",
             f"{d1} × {n2} = {denominador}"
         )
-
+    
     # --------------------------------------
     # SIMPLIFICACIÓN
     # --------------------------------------
-
     resultado = generar_resultado(numerador, denominador)
 
-    if (
-        resultado["numerador"] != numerador
-        or resultado["denominador"] != denominador
-    ):
+    if resultado["simplificada"]:
+        divisor = resultado["mcd"]
+        nuevo_n = resultado["numerador"]
+        nuevo_d = resultado["denominador"]
 
         agregar_paso(
             pasos,
             "R07",
-            "Simplificar la fracción dividiendo "
-            "el numerador y el denominador por su MCD.",
-            resultado["fraccion"]
+            (
+                f"Simplificar dividiendo el numerador y "
+                f"el denominador entre {divisor}."
+            ),
+            (
+                f"{numerador}/{denominador} = "
+                f"({numerador} ÷ {divisor})/"
+                f"({denominador} ÷ {divisor}) = "
+                f"{nuevo_n}/{nuevo_d}"
+            )
         )
 
     else:
-
         agregar_paso(
             pasos,
             "R08",
@@ -243,32 +237,29 @@ def operar_fracciones(n1, d1, n2, d2, operacion):
             resultado["fraccion"]
         )
 
-    agregar_paso(
-        pasos,
-        "R09",
-        "Presentar el resultado final.",
-        resultado["mixto"]
-    )
+        agregar_paso(
+            pasos,
+            "R09",
+            "Presentar el resultado final.",
+            resultado["mixto"]
+        )
 
     return {
         "entrada": {
-            "numerador1": n1,
-            "denominador1": d1,
-            "numerador2": n2,
-            "denominador2": d2,
+            "numerador1": entrada_original[0],
+            "denominador1": entrada_original[1],
+            "numerador2": entrada_original[2],
+            "denominador2": entrada_original[3],
             "operacion": operacion
         },
         "pasos": pasos,
         "resultado": resultado
     }
 
-
 # ==========================================
 # 6. PRUEBAS DE EJEMPLO
 # ==========================================
-
 if __name__ == "__main__":
-
     pruebas = [
         ("Suma", 2, 3, 1, 4, "+"),
         ("Resta", 1, 4, 3, 4, "-"),
@@ -278,9 +269,7 @@ if __name__ == "__main__":
         ("Numeradores negativos", -2, 3, 1, 4, "+"),
         ("Denominadores negativos", 2, -3, 1, 4, "+"),
     ]
-
     for nombre, n1, d1, n2, d2, operador in pruebas:
-
         print(f"\n========== {nombre.upper()} ==========")
 
         resultado = operar_fracciones(
