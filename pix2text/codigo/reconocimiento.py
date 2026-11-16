@@ -3,7 +3,7 @@ from pix2text import Pix2Text
 
 # Obtener la ruta de la imagen
 BASE_DIR = Path(__file__).resolve().parent
-RUTA_IMAGEN = BASE_DIR.parent / "imagenes" / "frac_6.png"
+RUTA_IMAGEN = BASE_DIR.parent / "imagenes" / "frac_3.png"
 
 # Comprobar la imagen seleccionada
 print("Imagen seleccionada:", RUTA_IMAGEN)

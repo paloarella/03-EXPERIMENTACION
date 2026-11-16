@@ -1,7 +1,5 @@
-
 from fractions import Fraction
-from mcm import calcular_mcm
-
+from .mcm import calcular_mcm
 
 # ==========================================
 # 1. VALIDAR CONVERSION A DENOMINADOR COMUN
@@ -74,7 +72,6 @@ def validar_conversion(
 # ==========================================
 # 2. VALIDAR LA SUMA DE NUMERADORES
 # ==========================================
-
 def validar_suma(
     numerador1,
     numerador2,
@@ -118,7 +115,6 @@ def validar_suma(
 # ==========================================
 # 3. VALIDAR LA SIMPLIFICACION
 # ==========================================
-
 def validar_simplificacion(
     numerador,
     denominador,
@@ -168,11 +164,8 @@ def validar_simplificacion(
 # ==========================================
 # 4. PRUEBAS INICIALES
 # ==========================================
-
 if __name__ == "__main__":
-
     print("\n========== PRUEBA 1: CONVERSION ==========")
-
     resultado = validar_conversion(
         4, 15,
         3, 20,
@@ -180,49 +173,39 @@ if __name__ == "__main__":
         16, 60,
         9, 60
     )
-
     print(resultado)
 
     print("\n========== PRUEBA 2: SUMA ==========")
-
     resultado = validar_suma(
         16, 9,
         60,
         25, 60
     )
-
     print(resultado)
 
     print("\n========== PRUEBA 3: SIMPLIFICACION ==========")
-
     resultado = validar_simplificacion(
         25, 60,
         5, 12
     )
-
     print(resultado)
 
     print("\n========== PRUEBA 4: SUMA INCORRECTA ==========")
-
     resultado = validar_suma(
         16, 9,
         60,
         24, 60
     )
-
     print(resultado)
 
     print("\n========== PRUEBA 5: SIN SIMPLIFICAR ==========")
-
     resultado = validar_simplificacion(
         25, 60,
         25, 60
     )
-
     print(resultado)
 
     print("\n========== PRUEBA 6: CONVERSION INCORRECTA ==========")
-
     resultado = validar_conversion(
         4, 15,
         3, 20,
@@ -230,5 +213,4 @@ if __name__ == "__main__":
         32, 120,
         18, 120
     )
-
     print(resultado)

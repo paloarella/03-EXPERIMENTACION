@@ -1,14 +1,12 @@
-
 from fractions import Fraction
-from mcm import calcular_mcm
-
+from .mcm import calcular_mcm
+from hypothesis import assume
 
 # ==========================================
 # 1. VALIDAR EL MCM
 # ==========================================
 
 def validar_mcm_resta(d1, d2, mcm_estudiante):
-
     mcm_correcto = calcular_mcm(d1, d2)
 
     if mcm_estudiante == mcm_correcto:
@@ -37,7 +35,6 @@ def validar_mcm_resta(d1, d2, mcm_estudiante):
 # ==========================================
 # 2. VALIDAR CONVERSION DE FRACCIONES
 # ==========================================
-
 def validar_conversion_fracciones(
     n1, d1,
     n2, d2,
@@ -82,7 +79,6 @@ def validar_conversion_fracciones(
 # ==========================================
 # 3. VALIDAR CONVERSION DE ENTERO
 # ==========================================
-
 def validar_conversion_entero(
     entero,
     denominador,
@@ -95,7 +91,6 @@ def validar_conversion_entero(
             "valido": False,
             "mensaje": "Los valores ingresados no son validos."
         }
-
     numerador_correcto = entero * denominador
 
     if (
@@ -116,7 +111,6 @@ def validar_conversion_entero(
 # ==========================================
 # 4. VALIDAR PRESTAMO DE UNA UNIDAD
 # ==========================================
-
 def validar_prestamo(
     entero,
     numerador,
@@ -176,7 +170,6 @@ def validar_prestamo(
 # ==========================================
 # 5. VALIDAR RESULTADO DE LA RESTA
 # ==========================================
-
 def validar_resta(
     entero1, numerador1, denominador1,
     entero2, numerador2, denominador2,
@@ -215,7 +208,6 @@ def validar_resta(
         entero2 * denominador2 + numerador2,
         denominador2
     )
-
     resultado_correcto = valor1 - valor2
 
     resultado_estudiante = Fraction(
@@ -268,9 +260,7 @@ def validar_resta(
 # ==========================================
 # 6. PRUEBAS DEL MODULO
 # ==========================================
-
 if __name__ == "__main__":
-
     print("\n========== R01: MCM ==========")
     print(validar_mcm_resta(2, 8, 8))
 
